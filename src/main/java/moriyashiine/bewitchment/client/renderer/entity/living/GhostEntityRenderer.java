@@ -10,7 +10,7 @@ import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.render.entity.EntityRenderDispatcher;
+import net.minecraft.client.render.entity.EntityRendererFactory;
 import net.minecraft.client.render.entity.MobEntityRenderer;
 import net.minecraft.client.render.entity.feature.FeatureRenderer;
 import net.minecraft.client.render.entity.feature.HeldItemFeatureRenderer;
@@ -23,10 +23,10 @@ public class GhostEntityRenderer extends MobEntityRenderer<GhostEntity, GhostEnt
 	public static final Identifier EMPTY = new Identifier("minecraft", "textures/block/redstone_dust_overlay.png");
 	private static Identifier[] TEXTURES;
 	
-	public GhostEntityRenderer(EntityRenderDispatcher entityRenderDispatcher) {
-		super(entityRenderDispatcher, new GhostEntityModel<>(), 0);
+	public GhostEntityRenderer(EntityRendererFactory.Context context) {
+		super(context, new GhostEntityModel<>(), 0);
 		addFeature(new HeldItemFeatureRenderer<>(this));
-		addFeature(new FeatureRenderer<GhostEntity, GhostEntityModel<GhostEntity>>(this) {
+		addFeature(new FeatureRenderer<>(this) {
 			@Override
 			public void render(MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, GhostEntity entity, float limbAngle, float limbDistance, float tickDelta, float animationProgress, float headYaw, float headPitch) {
 				if (TEXTURES == null) {

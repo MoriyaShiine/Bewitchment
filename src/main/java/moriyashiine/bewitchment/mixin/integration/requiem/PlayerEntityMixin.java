@@ -11,7 +11,7 @@ import net.minecraft.entity.data.DataTracker;
 import net.minecraft.entity.data.TrackedData;
 import net.minecraft.entity.data.TrackedDataHandlerRegistry;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.Identifier;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
@@ -50,21 +50,21 @@ public abstract class PlayerEntityMixin extends LivingEntity implements RequiemC
 		this.weakToSilverFromRequiem = weakToSilver;
 	}
 	
-	@Inject(method = "readCustomDataFromTag", at = @At("TAIL"))
-	private void readCustomDataFromTag(CompoundTag tag, CallbackInfo callbackInfo) {
+	@Inject(method = "readCustomDataFromNbt", at = @At("TAIL"))
+	private void readCustomDataFromNbt(NbtCompound nbt, CallbackInfo callbackInfo) {
 		if (Bewitchment.isRequiemLoaded) {
-			setWeakToSilverFromRequiem(tag.getBoolean("WeakToSilverFromRequiem"));
-			if (tag.contains("CachedTransformationForRequiem")) {
-				setCachedTransformationForRequiem(BWRegistries.TRANSFORMATIONS.get(new Identifier(tag.getString("CachedTransformationForRequiem"))));
+			setWeakToSilverFromRequiem(nbt.getBoolean("WeakToSilverFromRequiem"));
+			if (nbt.contains("CachedTransformationForRequiem")) {
+				setCachedTransformationForRequiem(BWRegistries.TRANSFORMATIONS.get(new Identifier(nbt.getString("CachedTransformationForRequiem"))));
 			}
 		}
 	}
 	
-	@Inject(method = "writeCustomDataToTag", at = @At("TAIL"))
-	private void writeCustomDataToTag(CompoundTag tag, CallbackInfo callbackInfo) {
+	@Inject(method = "writeCustomDataToNbt", at = @At("TAIL"))
+	private void writeCustomDataToNbt(NbtCompound nbt, CallbackInfo callbackInfo) {
 		if (Bewitchment.isRequiemLoaded) {
-			tag.putBoolean("WeakToSilverFromRequiem", getWeakToSilverFromRequiem());
-			tag.putString("CachedTransformationForRequiem", BWRegistries.TRANSFORMATIONS.getId(getCachedTransformationForRequiem()).toString());
+			nbt.putBoolean("WeakToSilverFromRequiem", getWeakToSilverFromRequiem());
+			nbt.putString("CachedTransformationForRequiem", BWRegistries.TRANSFORMATIONS.getId(getCachedTransformationForRequiem()).toString());
 		}
 	}
 	

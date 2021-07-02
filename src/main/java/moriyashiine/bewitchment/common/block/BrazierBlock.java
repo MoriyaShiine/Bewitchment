@@ -7,6 +7,8 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.block.entity.BlockEntityTicker;
+import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.Inventory;
@@ -49,8 +51,14 @@ public class BrazierBlock extends LanternBlock implements BlockEntityProvider {
 	
 	@Nullable
 	@Override
-	public BlockEntity createBlockEntity(BlockView world) {
-		return new BrazierBlockEntity();
+	public BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
+		return new BrazierBlockEntity(pos, state);
+	}
+	
+	@Nullable
+	@Override
+	public <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state, BlockEntityType<T> type) {
+		return (world1, pos, state1, blockEntity) -> BrazierBlockEntity.tick(world1, pos, state1, (BrazierBlockEntity) blockEntity);
 	}
 	
 	@Override

@@ -11,9 +11,9 @@ import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.StringTag;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtList;
+import net.minecraft.nbt.NbtString;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
@@ -44,23 +44,23 @@ public interface SigilHolder {
 	
 	void setModeOnWhitelist(boolean modeOnWhitelist);
 	
-	default void fromTagSigil(CompoundTag tag) {
-		ListTag entities = tag.getList("Entities", NbtType.STRING);
+	default void fromNbtSigil(NbtCompound nbt) {
+		NbtList entities = nbt.getList("Entities", NbtType.STRING);
 		for (int i = 0; i < entities.size(); i++) {
 			getEntities().add(UUID.fromString(entities.getString(i)));
 		}
-		if (tag.contains("Owner")) {
-			setOwner(tag.getUuid("Owner"));
+		if (nbt.contains("Owner")) {
+			setOwner(nbt.getUuid("Owner"));
 		}
-		setSigil(BWRegistries.SIGILS.get(new Identifier(tag.getString("Sigil"))));
-		setUses(tag.getInt("Uses"));
-		setModeOnWhitelist(tag.getBoolean("ModeOnWhitelist"));
+		setSigil(BWRegistries.SIGILS.get(new Identifier(nbt.getString("Sigil"))));
+		setUses(nbt.getInt("Uses"));
+		setModeOnWhitelist(nbt.getBoolean("ModeOnWhitelist"));
 	}
 	
-	default void toTagSigil(CompoundTag tag) {
-		ListTag entities = new ListTag();
+	default void toNbtSigil(NbtCompound tag) {
+		NbtList entities = new NbtList();
 		for (int i = 0; i < getEntities().size(); i++) {
-			entities.add(StringTag.of(getEntities().get(i).toString()));
+			entities.add(NbtString.of(getEntities().get(i).toString()));
 		}
 		tag.put("Entities", entities);
 		if (getOwner() != null) {

@@ -29,7 +29,7 @@ import net.minecraft.entity.player.HungerManager;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.FoodComponent;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.sound.SoundEvents;
@@ -135,14 +135,14 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Transfor
 			PlayerEntity player = (PlayerEntity) (Object) this;
 			boolean vampire = BewitchmentAPI.isVampire(player, true);
 			boolean werewolfBeast = BewitchmentAPI.isWerewolf(player, false);
-			EntityAttributeInstance attackDamageAttribute = player.getAttributeInstance(EntityAttributes.GENERIC_ATTACK_DAMAGE);
-			EntityAttributeInstance attackSpeedAttribute = player.getAttributeInstance(EntityAttributes.GENERIC_ATTACK_SPEED);
-			EntityAttributeInstance armorAttribute = player.getAttributeInstance(EntityAttributes.GENERIC_ARMOR);
-			EntityAttributeInstance armorToughnessAttribute = player.getAttributeInstance(EntityAttributes.GENERIC_ARMOR_TOUGHNESS);
-			EntityAttributeInstance movementSpeedAttribute = player.getAttributeInstance(EntityAttributes.GENERIC_MOVEMENT_SPEED);
-			EntityAttributeInstance attackRange = player.getAttributeInstance(ReachEntityAttributes.ATTACK_RANGE);
-			EntityAttributeInstance reach = player.getAttributeInstance(ReachEntityAttributes.REACH);
-			EntityAttributeInstance stepHeight = player.getAttributeInstance(StepHeightEntityAttributeMain.STEP_HEIGHT);
+			EntityAttributeInstance attackDamageAttribute = getAttributeInstance(EntityAttributes.GENERIC_ATTACK_DAMAGE);
+			EntityAttributeInstance attackSpeedAttribute = getAttributeInstance(EntityAttributes.GENERIC_ATTACK_SPEED);
+			EntityAttributeInstance armorAttribute = getAttributeInstance(EntityAttributes.GENERIC_ARMOR);
+			EntityAttributeInstance armorToughnessAttribute = getAttributeInstance(EntityAttributes.GENERIC_ARMOR_TOUGHNESS);
+			EntityAttributeInstance movementSpeedAttribute = getAttributeInstance(EntityAttributes.GENERIC_MOVEMENT_SPEED);
+			EntityAttributeInstance attackRange = getAttributeInstance(ReachEntityAttributes.ATTACK_RANGE);
+			EntityAttributeInstance reach = getAttributeInstance(ReachEntityAttributes.REACH);
+			EntityAttributeInstance stepHeight = getAttributeInstance(StepHeightEntityAttributeMain.STEP_HEIGHT);
 			boolean shouldHave = vampire && !BewitchmentAPI.isPledged(player, BWPledges.LILITH);
 			if (shouldHave && !attackDamageAttribute.hasModifier(VAMPIRE_ATTACK_DAMAGE_MODIFIER_0)) {
 				attackDamageAttribute.addPersistentModifier(VAMPIRE_ATTACK_DAMAGE_MODIFIER_0);
@@ -312,22 +312,22 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Transfor
 		}
 	}
 	
-	@Inject(method = "readCustomDataFromTag", at = @At("TAIL"))
-	private void readCustomDataFromTag(CompoundTag tag, CallbackInfo callbackInfo) {
-		if (tag.contains("Transformation")) {
-			setTransformation(BWRegistries.TRANSFORMATIONS.get(new Identifier(tag.getString("Transformation"))));
+	@Inject(method = "readCustomDataFromNbt", at = @At("TAIL"))
+	private void readCustomDataFromNbt(NbtCompound nbt, CallbackInfo callbackInfo) {
+		if (nbt.contains("Transformation")) {
+			setTransformation(BWRegistries.TRANSFORMATIONS.get(new Identifier(nbt.getString("Transformation"))));
 		}
-		setAlternateForm(tag.getBoolean("AlternateForm"));
-		setForcedTransformation(tag.getBoolean("ForcedTransformation"));
-		setWerewolfVariant(tag.getInt("WerewolfVariant"));
+		setAlternateForm(nbt.getBoolean("AlternateForm"));
+		setForcedTransformation(nbt.getBoolean("ForcedTransformation"));
+		setWerewolfVariant(nbt.getInt("WerewolfVariant"));
 	}
 	
-	@Inject(method = "writeCustomDataToTag", at = @At("TAIL"))
-	private void writeCustomDataToTag(CompoundTag tag, CallbackInfo callbackInfo) {
-		tag.putString("Transformation", BWRegistries.TRANSFORMATIONS.getId(getTransformation()).toString());
-		tag.putBoolean("AlternateForm", getAlternateForm());
-		tag.putBoolean("ForcedTransformation", getForcedTransformation());
-		tag.putInt("WerewolfVariant", getWerewolfVariant());
+	@Inject(method = "writeCustomDataToNbt", at = @At("TAIL"))
+	private void writeCustomDataToNbt(NbtCompound nbt, CallbackInfo callbackInfo) {
+		nbt.putString("Transformation", BWRegistries.TRANSFORMATIONS.getId(getTransformation()).toString());
+		nbt.putBoolean("AlternateForm", getAlternateForm());
+		nbt.putBoolean("ForcedTransformation", getForcedTransformation());
+		nbt.putInt("WerewolfVariant", getWerewolfVariant());
 	}
 	
 	@Inject(method = "initDataTracker", at = @At("TAIL"))

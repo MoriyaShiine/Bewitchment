@@ -2,7 +2,7 @@
   "required": true,
   "minVersion": "0.8",
   "package": "moriyashiine.bewitchment.mixin",
-  "compatibilityLevel": "JAVA_8",
+  "compatibilityLevel": "JAVA_16",
   "mixins": [
 	"AbstractBlockMixin",
 	"AbstractBlockStateMixin",
@@ -22,8 +22,6 @@
 	"OpenDoorsTaskMixin",
 	"PlayerEntityMixin",
 	"SpawnHelperMixin",
-	"StatusEffectAccessor",
-	"TreeDecoratorTypeAccessor",
 	"VillagerEntityMixin",
 	"brew.AreaEffectCloudEntityMixin",
 	"brew.ArrowEntityMixin",

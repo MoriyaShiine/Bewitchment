@@ -8,7 +8,8 @@ public class Contract {
 	
 	public static class Instance {
 		public final Contract contract;
-		public int duration, cost;
+		public int duration;
+		public final int cost;
 		
 		public Instance(Contract contract, int duration, int cost) {
 			this.contract = contract;

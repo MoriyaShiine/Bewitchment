@@ -2,8 +2,8 @@ package moriyashiine.bewitchment.api.interfaces.entity;
 
 import moriyashiine.bewitchment.api.registry.Contract;
 import moriyashiine.bewitchment.common.registry.BWRegistries;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtList;
 
 import java.util.List;
 
@@ -37,10 +37,10 @@ public interface ContractAccessor {
 		}
 	}
 	
-	default ListTag toTagContract() {
-		ListTag contracts = new ListTag();
+	default NbtList toNbtContract() {
+		NbtList contracts = new NbtList();
 		for (Contract.Instance instance : getContracts()) {
-			CompoundTag contractTag = new CompoundTag();
+			NbtCompound contractTag = new NbtCompound();
 			contractTag.putString("Contract", BWRegistries.CONTRACTS.getId(instance.contract).toString());
 			contractTag.putInt("Duration", instance.duration);
 			contractTag.putInt("Cost", instance.cost);

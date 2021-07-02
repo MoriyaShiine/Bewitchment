@@ -24,7 +24,7 @@ import net.minecraft.inventory.Inventories;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.particle.ParticleEffect;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.world.ServerWorld;
@@ -33,7 +33,6 @@ import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.ItemScatterer;
-import net.minecraft.util.Tickable;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
@@ -43,7 +42,7 @@ import net.minecraft.world.World;
 import java.util.List;
 
 @SuppressWarnings("ConstantConditions")
-public class GlyphBlockEntity extends BlockEntity implements BlockEntityClientSerializable, Tickable, Inventory, UsesAltarPower {
+public class GlyphBlockEntity extends BlockEntity implements BlockEntityClientSerializable, Inventory, UsesAltarPower {
 	private static final byte[][] inner = {{0, 0, 1, 1, 1, 0, 0}, {0, 1, 0, 0, 0, 1, 0}, {1, 0, 0, 0, 0, 0, 1}, {1, 0, 0, 0, 0, 0, 1}, {1, 0, 0, 0, 0, 0, 1}, {0, 1, 0, 0, 0, 1, 0}, {0, 0, 1, 1, 1, 0, 0}};
 	private static final byte[][] outer = {{0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0}, {0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0}, {0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0}, {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1}, {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1}, {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1}, {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1}, {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1}, {0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0}, {0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0}, {0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0}};
 	
@@ -58,56 +57,96 @@ public class GlyphBlockEntity extends BlockEntity implements BlockEntityClientSe
 	
 	private boolean loaded = false;
 	
-	public GlyphBlockEntity(BlockEntityType<?> type) {
-		super(type);
+	public GlyphBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
+		super(type, pos, state);
 	}
 	
-	public GlyphBlockEntity() {
-		this(BWBlockEntityTypes.GLYPH);
+	public GlyphBlockEntity(BlockPos pos, BlockState state) {
+		this(BWBlockEntityTypes.GLYPH, pos, state);
+	}
+	
+	public static void tick(World world, BlockPos pos, BlockState state, GlyphBlockEntity blockEntity) {
+		if (world != null) {
+			if (!blockEntity.loaded) {
+				blockEntity.markDirty();
+				blockEntity.loaded = true;
+			}
+			if (blockEntity.ritualFunction != null) {
+				BlockPos targetPos = blockEntity.effectivePos == null ? pos : blockEntity.effectivePos;
+				blockEntity.timer++;
+				if (world.isClient) {
+					world.addParticle(ParticleTypes.END_ROD, true, pos.getX() + 0.5 + MathHelper.nextFloat(world.random, -0.2f, 0.2f), pos.getY() + 0.5 + MathHelper.nextFloat(world.random, -0.2f, 0.2f), pos.getZ() + 0.5 + MathHelper.nextFloat(world.random, -0.2f, 0.2f), 0, 0, 0);
+					if (blockEntity.timer < 0) {
+						for (int i = 0; i < 3; i++) {
+							world.addParticle((ParticleEffect) blockEntity.ritualFunction.startParticle, true, targetPos.getX() + 0.5 + MathHelper.nextFloat(world.random, -0.2f, 0.2f), targetPos.getY() + 0.5 + MathHelper.nextFloat(world.random, -0.2f, 0.2f), targetPos.getZ() + 0.5 + MathHelper.nextFloat(world.random, -0.2f, 0.2f), MathHelper.nextFloat(world.random, -1, 1), MathHelper.nextFloat(world.random, 0.125f, 1), MathHelper.nextFloat(world.random, -1, 1));
+						}
+					}
+				}
+				if (blockEntity.timer >= 0) {
+					blockEntity.ritualFunction.tick(world, pos, targetPos, blockEntity.catFamiliar);
+					if (!world.isClient) {
+						world.getWorldChunk(blockEntity.effectivePos);
+						if (blockEntity.timer == 0) {
+							blockEntity.ritualFunction.start((ServerWorld) world, pos, targetPos, blockEntity, blockEntity.catFamiliar);
+							world.playSound(null, pos, BWSoundEvents.BLOCK_GLYPH_PLING, SoundCategory.BLOCKS, 1, 1);
+							ItemScatterer.spawn(world, pos, blockEntity);
+						}
+						if (blockEntity.timer >= blockEntity.endTime) {
+							blockEntity.effectivePos = null;
+							blockEntity.ritualFunction = null;
+							blockEntity.timer = 0;
+							blockEntity.endTime = 0;
+							blockEntity.catFamiliar = false;
+							blockEntity.syncGlyph();
+						}
+					}
+				}
+			}
+		}
 	}
 	
 	@Override
-	public void fromClientTag(CompoundTag tag) {
-		if (tag.contains("AltarPos")) {
-			setAltarPos(BlockPos.fromLong(tag.getLong("AltarPos")));
+	public void fromClientTag(NbtCompound nbt) {
+		if (nbt.contains("AltarPos")) {
+			setAltarPos(BlockPos.fromLong(nbt.getLong("AltarPos")));
 		}
-		if (tag.contains("EffectivePos")) {
-			effectivePos = BlockPos.fromLong(tag.getLong("EffectivePos"));
+		if (nbt.contains("EffectivePos")) {
+			effectivePos = BlockPos.fromLong(nbt.getLong("EffectivePos"));
 		}
-		Inventories.fromTag(tag, inventory);
-		ritualFunction = BWRegistries.RITUAL_FUNCTIONS.get(new Identifier(tag.getString("RitualFunction")));
-		timer = tag.getInt("Timer");
-		endTime = tag.getInt("EndTime");
-		catFamiliar = tag.getBoolean("CatFamiliar");
+		Inventories.readNbt(nbt, inventory);
+		ritualFunction = BWRegistries.RITUAL_FUNCTIONS.get(new Identifier(nbt.getString("RitualFunction")));
+		timer = nbt.getInt("Timer");
+		endTime = nbt.getInt("EndTime");
+		catFamiliar = nbt.getBoolean("CatFamiliar");
 	}
 	
 	@Override
-	public CompoundTag toClientTag(CompoundTag tag) {
+	public NbtCompound toClientTag(NbtCompound nbt) {
 		if (getAltarPos() != null) {
-			tag.putLong("AltarPos", getAltarPos().asLong());
+			nbt.putLong("AltarPos", getAltarPos().asLong());
 		}
 		if (effectivePos != null) {
-			tag.putLong("EffectivePos", effectivePos.asLong());
+			nbt.putLong("EffectivePos", effectivePos.asLong());
 		}
-		Inventories.toTag(tag, inventory);
+		Inventories.writeNbt(nbt, inventory);
 		if (ritualFunction != null) {
-			tag.putString("RitualFunction", BWRegistries.RITUAL_FUNCTIONS.getId(ritualFunction).toString());
+			nbt.putString("RitualFunction", BWRegistries.RITUAL_FUNCTIONS.getId(ritualFunction).toString());
 		}
-		tag.putInt("Timer", timer);
-		tag.putInt("EndTime", endTime);
-		tag.putBoolean("CatFamiliar", catFamiliar);
-		return tag;
+		nbt.putInt("Timer", timer);
+		nbt.putInt("EndTime", endTime);
+		nbt.putBoolean("CatFamiliar", catFamiliar);
+		return nbt;
 	}
 	
 	@Override
-	public void fromTag(BlockState state, CompoundTag tag) {
-		fromClientTag(tag);
-		super.fromTag(state, tag);
+	public void readNbt(NbtCompound nbt) {
+		fromClientTag(nbt);
+		super.readNbt(nbt);
 	}
 	
 	@Override
-	public CompoundTag toTag(CompoundTag tag) {
-		return super.toTag(toClientTag(tag));
+	public NbtCompound writeNbt(NbtCompound nbt) {
+		return super.writeNbt(toClientTag(nbt));
 	}
 	
 	@Override
@@ -118,47 +157,6 @@ public class GlyphBlockEntity extends BlockEntity implements BlockEntityClientSe
 	@Override
 	public void setAltarPos(BlockPos pos) {
 		this.altarPos = pos;
-	}
-	
-	@Override
-	public void tick() {
-		if (world != null) {
-			if (!loaded) {
-				markDirty();
-				loaded = true;
-			}
-			if (ritualFunction != null) {
-				BlockPos targetPos = effectivePos == null ? pos : effectivePos;
-				timer++;
-				if (world.isClient) {
-					world.addParticle(ParticleTypes.END_ROD, true, pos.getX() + 0.5 + MathHelper.nextFloat(world.random, -0.2f, 0.2f), pos.getY() + 0.5 + MathHelper.nextFloat(world.random, -0.2f, 0.2f), pos.getZ() + 0.5 + MathHelper.nextFloat(world.random, -0.2f, 0.2f), 0, 0, 0);
-					if (timer < 0) {
-						for (int i = 0; i < 3; i++) {
-							world.addParticle((ParticleEffect) ritualFunction.startParticle, true, targetPos.getX() + 0.5 + MathHelper.nextFloat(world.random, -0.2f, 0.2f), targetPos.getY() + 0.5 + MathHelper.nextFloat(world.random, -0.2f, 0.2f), targetPos.getZ() + 0.5 + MathHelper.nextFloat(world.random, -0.2f, 0.2f), MathHelper.nextFloat(world.random, -1, 1), MathHelper.nextFloat(world.random, 0.125f, 1), MathHelper.nextFloat(world.random, -1, 1));
-						}
-					}
-				}
-				if (timer >= 0) {
-					ritualFunction.tick(world, pos, targetPos, catFamiliar);
-					if (!world.isClient) {
-						world.getWorldChunk(effectivePos);
-						if (timer == 0) {
-							ritualFunction.start((ServerWorld) world, pos, targetPos, this, catFamiliar);
-							world.playSound(null, pos, BWSoundEvents.BLOCK_GLYPH_PLING, SoundCategory.BLOCKS, 1, 1);
-							ItemScatterer.spawn(world, pos, this);
-						}
-						if (timer >= endTime) {
-							effectivePos = null;
-							ritualFunction = null;
-							timer = 0;
-							endTime = 0;
-							catFamiliar = false;
-							syncGlyph();
-						}
-					}
-				}
-			}
-		}
 	}
 	
 	@Override

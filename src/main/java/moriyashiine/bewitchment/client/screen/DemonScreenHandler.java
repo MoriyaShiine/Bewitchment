@@ -26,8 +26,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DemonScreenHandler extends ScreenHandler {
-	public DemonMerchant demonMerchant;
-	public Inventory demonInventory = new SimpleInventory(getOfferCount());
+	public final DemonMerchant demonMerchant;
+	public final Inventory demonInventory = new SimpleInventory(getOfferCount());
 	
 	public DemonScreenHandler(int syncId) {
 		this(syncId, new DemonMerchantImpl());
@@ -61,43 +61,32 @@ public class DemonScreenHandler extends ScreenHandler {
 	}
 	
 	@Override
-	public ItemStack onSlotClick(int i, int j, SlotActionType actionType, PlayerEntity playerEntity) {
-		if (i == -999) {
-			return super.onSlotClick(i, j, actionType, playerEntity);
+	public void onSlotClick(int slotIndex, int button, SlotActionType actionType, PlayerEntity player) {
+		if (slotIndex == -999) {
+			return;
 		}
-		Slot slot = slots.get(i);
+		Slot slot = slots.get(slotIndex);
 		if (slot instanceof DemonTradeSlot) {
 			DemonEntity.DemonTradeOffer offer = ((DemonTradeSlot) slot).getOffer();
-			if (!((ContractAccessor) playerEntity).hasContract(offer.getContract())) {
+			if (!((ContractAccessor) player).hasContract(offer.getContract())) {
 				demonMerchant.onSell(offer);
 				demonMerchant.trade(offer);
 				if (!demonMerchant.getDemonTrader().world.isClient) {
-					SyncContractsPacket.send(playerEntity);
-					SyncDemonTradesPacket.send(playerEntity, demonMerchant, syncId);
+					SyncContractsPacket.send(player);
+					SyncDemonTradesPacket.send(player, demonMerchant, syncId);
 					int cost = offer.getCost(demonMerchant);
-					if (playerEntity.getMaxHealth() - cost <= 0) {
-						((ContractAccessor) playerEntity).getContracts().clear();
-						playerEntity.damage(BWDamageSources.DEATH, Float.MAX_VALUE);
+					if (player.getMaxHealth() - cost <= 0) {
+						((ContractAccessor) player).getContracts().clear();
+						player.damage(BWDamageSources.DEATH, Float.MAX_VALUE);
 					}
-					else if (playerEntity.getHealth() > playerEntity.getMaxHealth() - cost) {
-						playerEntity.setHealth(playerEntity.getMaxHealth() - cost);
+					else if (player.getHealth() > player.getMaxHealth() - cost) {
+						player.setHealth(player.getMaxHealth() - cost);
 					}
 				}
 			}
-			return ItemStack.EMPTY;
+			return;
 		}
-		return super.onSlotClick(i, j, actionType, playerEntity);
-	}
-	
-	@Override
-	@Environment(EnvType.CLIENT)
-	public void updateSlotStacks(List<ItemStack> stacks) {
-		super.updateSlotStacks(stacks);
-	}
-	
-	@Override
-	public void onContentChanged(Inventory inventory) {
-		super.onContentChanged(inventory);
+		super.onSlotClick(slotIndex, button, actionType, player);
 	}
 	
 	@Override
@@ -115,8 +104,8 @@ public class DemonScreenHandler extends ScreenHandler {
 		}
 		
 		@Override
-		public boolean doDrawHoveringEffect() {
-			return getOffer() != null && super.doDrawHoveringEffect();
+		public boolean isEnabled() {
+			return super.isEnabled() && getOffer() != null;
 		}
 		
 		@Override

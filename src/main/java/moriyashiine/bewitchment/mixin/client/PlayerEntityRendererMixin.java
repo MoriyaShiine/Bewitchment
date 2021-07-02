@@ -2,7 +2,6 @@ package moriyashiine.bewitchment.mixin.client;
 
 import moriyashiine.bewitchment.api.BewitchmentAPI;
 import moriyashiine.bewitchment.api.entity.BroomEntity;
-import moriyashiine.bewitchment.client.renderer.ContributorHornsFeatureRenderer;
 import moriyashiine.bewitchment.common.block.CoffinBlock;
 import moriyashiine.bewitchment.common.entity.interfaces.TrueInvisibleAccessor;
 import net.fabricmc.api.EnvType;
@@ -10,7 +9,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.render.entity.EntityRenderDispatcher;
+import net.minecraft.client.render.entity.EntityRendererFactory;
 import net.minecraft.client.render.entity.LivingEntityRenderer;
 import net.minecraft.client.render.entity.PlayerEntityRenderer;
 import net.minecraft.client.render.entity.model.PlayerEntityModel;
@@ -30,13 +29,13 @@ import java.util.Optional;
 @Environment(EnvType.CLIENT)
 @Mixin(PlayerEntityRenderer.class)
 public abstract class PlayerEntityRendererMixin extends LivingEntityRenderer<AbstractClientPlayerEntity, PlayerEntityModel<AbstractClientPlayerEntity>> {
-	public PlayerEntityRendererMixin(EntityRenderDispatcher dispatcher, PlayerEntityModel<AbstractClientPlayerEntity> model, float shadowRadius) {
-		super(dispatcher, model, shadowRadius);
+	public PlayerEntityRendererMixin(EntityRendererFactory.Context ctx, PlayerEntityModel<AbstractClientPlayerEntity> model, float shadowRadius) {
+		super(ctx, model, shadowRadius);
 	}
 	
-	@Inject(method = "<init>(Lnet/minecraft/client/render/entity/EntityRenderDispatcher;Z)V", at = @At("TAIL"))
-	private void PlayerEntityRenderer(EntityRenderDispatcher dispatcher, boolean bl, CallbackInfo callbackInfo) {
-		addFeature(new ContributorHornsFeatureRenderer(this));
+	@Inject(method = "<init>", at = @At("TAIL"))
+	private void PlayerEntityRenderer(EntityRendererFactory.Context ctx, boolean slim, CallbackInfo callbackInfo) {
+		//		addFeature(new ContributorHornsFeatureRenderer(this));
 	}
 	
 	@Inject(method = "render", at = @At("HEAD"), cancellable = true)
@@ -51,7 +50,7 @@ public abstract class PlayerEntityRendererMixin extends LivingEntityRenderer<Abs
 			return;
 		}
 		if (player.getVehicle() instanceof BroomEntity) {
-			matrixStack.translate(0, MathHelper.sin((player.getVehicle().age + player.getVehicle().getEntityId()) / 4f) / 16f, 0);
+			matrixStack.translate(0, MathHelper.sin((player.getVehicle().age + player.getVehicle().getId()) / 4f) / 16f, 0);
 		}
 		LivingEntity entity = BewitchmentAPI.getTransformedPlayerEntity(player);
 		if (entity != null) {
@@ -69,7 +68,7 @@ public abstract class PlayerEntityRendererMixin extends LivingEntityRenderer<Abs
 			entity.handSwingTicks = player.handSwingTicks;
 			entity.handSwingProgress = player.handSwingProgress;
 			entity.lastHandSwingProgress = player.lastHandSwingProgress;
-			entity.pitch = player.pitch;
+			entity.setPitch(player.getPitch());
 			entity.prevPitch = player.prevPitch;
 			entity.preferredHand = player.preferredHand;
 			entity.setStackInHand(Hand.MAIN_HAND, player.getMainHandStack());

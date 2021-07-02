@@ -26,7 +26,7 @@ import net.minecraft.fluid.FluidState;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.particle.DustParticleEffect;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvent;
@@ -38,6 +38,7 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.Vec3f;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.BlockView;
@@ -63,7 +64,7 @@ public class CrystalBallBlock extends Block implements Waterloggable {
 		boolean client = world.isClient;
 		if (client) {
 			for (int i = 0; i < 10; i++) {
-				world.addParticle(new DustParticleEffect(1, 1, 1, 1), pos.getX() + world.random.nextFloat(), pos.getY() + world.random.nextFloat(), pos.getZ() + world.random.nextFloat(), 0, 0, 0);
+				world.addParticle(new DustParticleEffect(new Vec3f(1, 1, 1), 1), pos.getX() + world.random.nextFloat(), pos.getY() + world.random.nextFloat(), pos.getZ() + world.random.nextFloat(), 0, 0, 0);
 			}
 		}
 		else {
@@ -90,15 +91,15 @@ public class CrystalBallBlock extends Block implements Waterloggable {
 								}
 							}
 							ItemStack newTaglock = new ItemStack(BWObjects.TAGLOCK);
-							CompoundTag tag = newTaglock.getOrCreateTag().copyFrom(stack.getTag());
-							tag.putBoolean("UsedForScrying", true);
+							NbtCompound nbt = newTaglock.getOrCreateTag().copyFrom(stack.getTag());
+							nbt.putBoolean("UsedForScrying", true);
 							if (!failed) {
-								tag.putLong("LocationPos", owner.getBlockPos().asLong());
-								tag.putString("LocationWorld", world.getRegistryKey().getValue().toString());
-								tag.putInt("Level", ((PlayerEntity) owner).experienceLevel);
-								tag.put("Curses", ((CurseAccessor) owner).toTagCurse());
-								tag.put("Contracts", ((ContractAccessor) owner).toTagContract());
-								tag.putString("Transformation", "transformation." + BWRegistries.TRANSFORMATIONS.getId(((TransformationAccessor) owner).getTransformation()).toString().replace(":", "."));
+								nbt.putLong("LocationPos", owner.getBlockPos().asLong());
+								nbt.putString("LocationWorld", world.getRegistryKey().getValue().toString());
+								nbt.putInt("Level", ((PlayerEntity) owner).experienceLevel);
+								nbt.put("Curses", ((CurseAccessor) owner).toNbtCurse());
+								nbt.put("Contracts", ((ContractAccessor) owner).toNbtContract());
+								nbt.putString("Transformation", "transformation." + BWRegistries.TRANSFORMATIONS.getId(((TransformationAccessor) owner).getTransformation()).toString().replace(":", "."));
 								BWUniversalWorldState worldState = BWUniversalWorldState.get(world);
 								String familiar = "none";
 								for (int i = 0; i < worldState.familiars.size(); i++) {
@@ -107,12 +108,12 @@ public class CrystalBallBlock extends Block implements Waterloggable {
 										break;
 									}
 								}
-								tag.putString("Familiar", familiar);
-								tag.putString("Pledge", ((PledgeAccessor) owner).getPledge());
+								nbt.putString("Familiar", familiar);
+								nbt.putString("Pledge", ((PledgeAccessor) owner).getPledge());
 								sound = BWSoundEvents.BLOCK_CRYSTAL_BALL_FIRE;
 							}
 							else {
-								tag.putBoolean("Failed", true);
+								nbt.putBoolean("Failed", true);
 								player.sendMessage(new TranslatableText(Bewitchment.MODID + ".message.blocked_by_shadows"), true);
 							}
 							BWUtil.addItemToInventoryAndConsume(player, hand, newTaglock);

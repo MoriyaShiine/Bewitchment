@@ -10,6 +10,8 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.block.entity.BlockEntityTicker;
+import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.block.piston.PistonBehavior;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemPlacementContext;
@@ -33,8 +35,14 @@ public class SigilBlock extends HorizontalFacingBlock implements BlockEntityProv
 	
 	@Nullable
 	@Override
-	public BlockEntity createBlockEntity(BlockView world) {
-		return new SigilBlockEntity();
+	public BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
+		return new SigilBlockEntity(pos, state);
+	}
+	
+	@Nullable
+	@Override
+	public <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state, BlockEntityType<T> type) {
+		return (world1, pos, state1, blockEntity) -> SigilBlockEntity.tick(world1, pos, state1, (SigilBlockEntity) blockEntity);
 	}
 	
 	@Override

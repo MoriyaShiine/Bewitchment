@@ -33,19 +33,18 @@
   "mixins": [
 	"bewitchment.mixins.json"
   ],
-  "accessWidener": "bewitchment.accesswidener",
   "depends": {
-	"fabricloader": ">=0.11.0",
+	"fabricloader": "*",
 	"fabric": "*",
-	"minecraft": "1.16.5",
-	"cloth-config2": ">=4.10.13",
+	"minecraft": "1.17.*",
+	"cloth-config2": "*",
 	"somnus": "*",
-	"pehkui": ">=2.1.0",
+	"pehkui": "*",
 	"impersonate": "*",
 	"patchouli": "*",
 	"trinkets": "*"
   },
-  "conflicts": {
+  "breaks": {
 	"optifabric": "*"
   }
 }

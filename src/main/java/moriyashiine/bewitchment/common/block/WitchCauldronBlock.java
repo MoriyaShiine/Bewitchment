@@ -10,6 +10,8 @@ import moriyashiine.bewitchment.common.registry.BWTags;
 import moriyashiine.bewitchment.common.world.BWWorldState;
 import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.block.entity.BlockEntityTicker;
+import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.block.piston.PistonBehavior;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -45,13 +47,19 @@ public class WitchCauldronBlock extends CauldronBlock implements BlockEntityProv
 	
 	public WitchCauldronBlock(Settings settings) {
 		super(settings);
-		setDefaultState(getDefaultState().with(Properties.WATERLOGGED, false).with(Properties.LEVEL_3, 0));
+		setDefaultState(getDefaultState().with(Properties.WATERLOGGED, false));
 	}
 	
 	@Nullable
 	@Override
-	public BlockEntity createBlockEntity(BlockView world) {
-		return new WitchCauldronBlockEntity();
+	public BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
+		return new WitchAltarBlockEntity(pos, state);
+	}
+	
+	@Nullable
+	@Override
+	public <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state, BlockEntityType<T> type) {
+		return (world1, pos, state1, blockEntity) -> WitchCauldronBlockEntity.tick(world1, pos, state1, (WitchCauldronBlockEntity) blockEntity);
 	}
 	
 	@Override
@@ -91,8 +99,7 @@ public class WitchCauldronBlock extends CauldronBlock implements BlockEntityProv
 	@Override
 	public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
 		BlockEntity blockEntity = world.getBlockEntity(pos);
-		if (blockEntity instanceof WitchCauldronBlockEntity) {
-			WitchCauldronBlockEntity cauldron = (WitchCauldronBlockEntity) blockEntity;
+		if (blockEntity instanceof WitchCauldronBlockEntity cauldron) {
 			boolean client = world.isClient;
 			ItemStack stack = player.getStackInHand(hand);
 			boolean nameTag = stack.getItem() instanceof NameTagItem, bucket = stack.getItem() == Items.BUCKET, waterBucket = stack.getItem() == Items.WATER_BUCKET, glassBottle = stack.getItem() == Items.GLASS_BOTTLE, waterBottle = stack.getItem() == Items.POTION && PotionUtil.getPotion(stack) == Potions.WATER;
@@ -198,7 +205,7 @@ public class WitchCauldronBlock extends CauldronBlock implements BlockEntityProv
 	}
 	
 	@Override
-	public void onSteppedOn(World world, BlockPos pos, Entity entity) {
+	public void onSteppedOn(World world, BlockPos pos, BlockState state, Entity entity) {
 		if (world.getBlockState(pos).get(Properties.LEVEL_3) > 0 && entity instanceof LivingEntity) {
 			WitchCauldronBlockEntity blockEntity = (WitchCauldronBlockEntity) world.getBlockEntity(pos);
 			if (blockEntity.heatTimer >= 60 && blockEntity.mode != WitchCauldronBlockEntity.Mode.TELEPORTATION) {

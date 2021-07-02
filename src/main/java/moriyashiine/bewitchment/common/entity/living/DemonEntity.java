@@ -28,9 +28,9 @@ import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.SmallFireballEntity;
 import net.minecraft.item.ArmorItem;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.Tag;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.NbtList;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.screen.SimpleNamedScreenHandlerFactory;
 import net.minecraft.sound.SoundEvent;
@@ -78,7 +78,7 @@ public class DemonEntity extends BWHostileEntity implements DemonMerchant {
 			LivingEntity target = getTarget();
 			if (target != null) {
 				lookAtEntity(target, 360, 360);
-				if ((age + getEntityId()) % 40 == 0) {
+				if ((age + getId()) % 40 == 0) {
 					SmallFireballEntity fireball = new SmallFireballEntity(world, this, target.getX() - getX(), target.getBodyY(0.5) - getBodyY(0.5), target.getZ() - getZ());
 					fireball.updatePosition(fireball.getX(), getBodyY(0.5), fireball.getZ());
 					world.playSound(null, getBlockPos(), BWSoundEvents.ENTITY_GENERIC_SHOOT, getSoundCategory(), getSoundVolume(), getSoundPitch());
@@ -162,37 +162,37 @@ public class DemonEntity extends BWHostileEntity implements DemonMerchant {
 	}
 	
 	@Override
-	public EntityData initialize(ServerWorldAccess world, LocalDifficulty difficulty, SpawnReason spawnReason, @Nullable EntityData entityData, @Nullable CompoundTag entityTag) {
+	public EntityData initialize(ServerWorldAccess world, LocalDifficulty difficulty, SpawnReason spawnReason, @Nullable EntityData entityData, @Nullable NbtCompound entityTag) {
 		dataTracker.set(MALE, random.nextBoolean());
 		return super.initialize(world, difficulty, spawnReason, entityData, entityTag);
 	}
 	
 	@Override
-	public void readCustomDataFromTag(CompoundTag tag) {
-		super.readCustomDataFromTag(tag);
-		dataTracker.set(MALE, tag.getBoolean("Male"));
-		if (tag.contains("Offers")) {
+	public void readCustomDataFromNbt(NbtCompound nbt) {
+		super.readCustomDataFromNbt(nbt);
+		dataTracker.set(MALE, nbt.getBoolean("Male"));
+		if (nbt.contains("Offers")) {
 			offers.clear();
-			ListTag offersTag = tag.getList("Offers", NbtType.COMPOUND);
-			for (Tag offerTag : offersTag) {
-				offers.add(new DemonTradeOffer((CompoundTag) offerTag));
+			NbtList offersTag = nbt.getList("Offers", NbtType.COMPOUND);
+			for (NbtElement offerTag : offersTag) {
+				offers.add(new DemonTradeOffer((NbtCompound) offerTag));
 			}
 		}
-		tradeResetTimer = tag.getInt("TradeResetTimer");
+		tradeResetTimer = nbt.getInt("TradeResetTimer");
 	}
 	
 	@Override
-	public void writeCustomDataToTag(CompoundTag tag) {
-		super.writeCustomDataToTag(tag);
-		tag.putBoolean("Male", dataTracker.get(MALE));
+	public void writeCustomDataToNbt(NbtCompound nbt) {
+		super.writeCustomDataToNbt(nbt);
+		nbt.putBoolean("Male", dataTracker.get(MALE));
 		if (!offers.isEmpty()) {
-			ListTag offersTag = new ListTag();
+			NbtList offersTag = new NbtList();
 			for (DemonTradeOffer offer : offers) {
 				offersTag.add(offer.toTag());
 			}
-			tag.put("Offers", offersTag);
+			nbt.put("Offers", offersTag);
 		}
-		tag.putInt("TradeResetTimer", tradeResetTimer);
+		nbt.putInt("TradeResetTimer", tradeResetTimer);
 	}
 	
 	@Override
@@ -268,7 +268,7 @@ public class DemonEntity extends BWHostileEntity implements DemonMerchant {
 		private final Contract contract;
 		private final int duration, cost;
 		
-		public DemonTradeOffer(CompoundTag tag) {
+		public DemonTradeOffer(NbtCompound tag) {
 			this(BWRegistries.CONTRACTS.get(new Identifier(tag.getString("Contract"))), tag.getInt("Duration"), tag.getInt("Cost"));
 		}
 		
@@ -278,8 +278,8 @@ public class DemonEntity extends BWHostileEntity implements DemonMerchant {
 			this.cost = cost;
 		}
 		
-		public CompoundTag toTag() {
-			CompoundTag tag = new CompoundTag();
+		public NbtCompound toTag() {
+			NbtCompound tag = new NbtCompound();
 			tag.putString("Contract", BWRegistries.CONTRACTS.getId(contract).toString());
 			tag.putInt("Duration", duration);
 			tag.putInt("Cost", cost);

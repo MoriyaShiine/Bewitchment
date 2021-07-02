@@ -9,10 +9,10 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.SpawnGroup;
 import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.mob.MobEntity;
+import net.minecraft.util.collection.Pool;
 import net.minecraft.world.ServerWorldAccess;
 import net.minecraft.world.biome.SpawnSettings;
 
-import java.util.List;
 import java.util.Optional;
 
 public class InsanityCurse extends Curse {
@@ -23,11 +23,11 @@ public class InsanityCurse extends Curse {
 	@Override
 	public void tick(LivingEntity target) {
 		if (target.age % 20 == 0 && target.getRandom().nextFloat() < 1 / 100f) {
-			List<SpawnSettings.SpawnEntry> entries = target.world.getBiome(target.getBlockPos()).getSpawnSettings().getSpawnEntry(SpawnGroup.MONSTER);
+			Pool<SpawnSettings.SpawnEntry> entries = target.world.getBiome(target.getBlockPos()).getSpawnSettings().getSpawnEntries(SpawnGroup.MONSTER);
 			Entity entity = null;
 			int tries = 0;
 			while (tries < 16) {
-				Entity potentialSpawn = entries.get(target.getRandom().nextInt(entries.size())).type.create(target.world);
+				Entity potentialSpawn = entries.getEntries().get(target.getRandom().nextInt(entries.getEntries().size())).type.create(target.world);
 				if (potentialSpawn != null && !BWTags.INSANITY_BLACKLIST.contains(potentialSpawn.getType())) {
 					entity = potentialSpawn;
 					break;

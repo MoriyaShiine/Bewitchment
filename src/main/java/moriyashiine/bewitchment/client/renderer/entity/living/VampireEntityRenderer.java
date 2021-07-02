@@ -6,7 +6,7 @@ import moriyashiine.bewitchment.common.entity.living.VampireEntity;
 import moriyashiine.bewitchment.common.entity.living.util.BWHostileEntity;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.render.entity.EntityRenderDispatcher;
+import net.minecraft.client.render.entity.EntityRendererFactory;
 import net.minecraft.client.render.entity.MobEntityRenderer;
 import net.minecraft.util.Identifier;
 
@@ -14,8 +14,8 @@ import net.minecraft.util.Identifier;
 public class VampireEntityRenderer extends MobEntityRenderer<VampireEntity, VampireEntityModel<VampireEntity>> {
 	private static Identifier[] TEXTURES;
 	
-	public VampireEntityRenderer(EntityRenderDispatcher entityRenderDispatcher) {
-		super(entityRenderDispatcher, new VampireEntityModel<>(), 0.3f);
+	public VampireEntityRenderer(EntityRendererFactory.Context context) {
+		super(context, new VampireEntityModel<>(), 0.3f);
 	}
 	
 	@Override

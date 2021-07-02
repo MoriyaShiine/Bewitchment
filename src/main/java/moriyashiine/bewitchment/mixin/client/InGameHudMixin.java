@@ -1,6 +1,5 @@
 package moriyashiine.bewitchment.mixin.client;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import moriyashiine.bewitchment.api.BewitchmentAPI;
 import moriyashiine.bewitchment.api.interfaces.entity.BloodAccessor;
 import moriyashiine.bewitchment.api.interfaces.entity.MagicAccessor;
@@ -48,11 +47,11 @@ public abstract class InGameHudMixin extends DrawableHelper {
 		MagicAccessor magicAccessor = (MagicAccessor) player;
 		if (magicAccessor.getMagicTimer() > 0) {
 			client.getTextureManager().bindTexture(BEWITCHMENT_GUI_ICONS_TEXTURE);
-			RenderSystem.color4f(1, 1, 1, magicAccessor.getMagicTimer() / 10f);
+			//			RenderSystem.color4f(1, 1, 1, magicAccessor.getMagicTimer() / 10f);
 			drawTexture(matrices, 13, (scaledHeight - 74) / 2, 25, 0, 7, 74);
 			drawTexture(matrices, 13, (scaledHeight - 74) / 2, 32, 0, 7, (int) (74 - (magicAccessor.getMagic() * 74f / MagicAccessor.MAX_MAGIC)));
 			drawTexture(matrices, 4, (scaledHeight - 102) / 2, 0, 0, 25, 102);
-			RenderSystem.color4f(1, 1, 1, 1);
+			//			RenderSystem.color4f(1, 1, 1, 1);
 			client.getTextureManager().bindTexture(GUI_ICONS_TEXTURE);
 		}
 		if (BewitchmentAPI.isVampire(player, true)) {

@@ -9,7 +9,7 @@ import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.render.entity.EntityRenderDispatcher;
+import net.minecraft.client.render.entity.EntityRendererFactory;
 import net.minecraft.client.render.entity.MobEntityRenderer;
 import net.minecraft.client.render.entity.feature.FeatureRenderer;
 import net.minecraft.client.render.entity.feature.HeldItemFeatureRenderer;
@@ -21,10 +21,10 @@ public class BaphometEntityRenderer extends MobEntityRenderer<BaphometEntity, Ba
 	private static final Identifier TEXTURE = new Identifier(Bewitchment.MODID, "textures/entity/living/baphomet/baphomet.png");
 	private static Identifier[] TEXTURES;
 	
-	public BaphometEntityRenderer(EntityRenderDispatcher entityRenderDispatcher) {
-		super(entityRenderDispatcher, new BaphometEntityModel<>(), 0.5f);
+	public BaphometEntityRenderer(EntityRendererFactory.Context context) {
+		super(context, new BaphometEntityModel<>(), 0.5f);
 		addFeature(new HeldItemFeatureRenderer<>(this));
-		addFeature(new FeatureRenderer<BaphometEntity, BaphometEntityModel<BaphometEntity>>(this) {
+		addFeature(new FeatureRenderer<>(this) {
 			@Override
 			public void render(MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, BaphometEntity entity, float limbAngle, float limbDistance, float tickDelta, float animationProgress, float headYaw, float headPitch) {
 				if (TEXTURES == null) {

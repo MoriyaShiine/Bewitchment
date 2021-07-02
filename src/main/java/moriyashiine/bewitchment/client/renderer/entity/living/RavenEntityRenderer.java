@@ -6,7 +6,7 @@ import moriyashiine.bewitchment.common.entity.living.RavenEntity;
 import moriyashiine.bewitchment.common.entity.living.util.BWTameableEntity;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.render.entity.EntityRenderDispatcher;
+import net.minecraft.client.render.entity.EntityRendererFactory;
 import net.minecraft.client.render.entity.MobEntityRenderer;
 import net.minecraft.util.Identifier;
 
@@ -14,8 +14,8 @@ import net.minecraft.util.Identifier;
 public class RavenEntityRenderer extends MobEntityRenderer<RavenEntity, RavenEntityModel<RavenEntity>> {
 	private static Identifier[] TEXTURES;
 	
-	public RavenEntityRenderer(EntityRenderDispatcher entityRenderDispatcher) {
-		super(entityRenderDispatcher, new RavenEntityModel<>(), 0.3f);
+	public RavenEntityRenderer(EntityRendererFactory.Context context) {
+		super(context, new RavenEntityModel<>(), 0.3f);
 	}
 	
 	@Override

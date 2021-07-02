@@ -5,7 +5,7 @@ import moriyashiine.bewitchment.common.Bewitchment;
 import moriyashiine.bewitchment.common.entity.living.LilithEntity;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.render.entity.EntityRenderDispatcher;
+import net.minecraft.client.render.entity.EntityRendererFactory;
 import net.minecraft.client.render.entity.MobEntityRenderer;
 import net.minecraft.client.render.entity.feature.HeldItemFeatureRenderer;
 import net.minecraft.util.Identifier;
@@ -14,8 +14,8 @@ import net.minecraft.util.Identifier;
 public class LilithEntityRenderer extends MobEntityRenderer<LilithEntity, LilithEntityModel<LilithEntity>> {
 	private static final Identifier TEXTURE = new Identifier(Bewitchment.MODID, "textures/entity/living/lilith.png");
 	
-	public LilithEntityRenderer(EntityRenderDispatcher entityRenderDispatcher) {
-		super(entityRenderDispatcher, new LilithEntityModel<>(), 0.5f);
+	public LilithEntityRenderer(EntityRendererFactory.Context context) {
+		super(context, new LilithEntityModel<>(), 0.5f);
 		addFeature(new HeldItemFeatureRenderer<>(this));
 	}
 	

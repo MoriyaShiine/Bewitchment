@@ -1,8 +1,5 @@
 package moriyashiine.bewitchment.common;
 
-import dev.emi.trinkets.api.SlotGroups;
-import dev.emi.trinkets.api.Slots;
-import dev.emi.trinkets.api.TrinketSlots;
 import me.shedaniel.autoconfig.AutoConfig;
 import me.shedaniel.autoconfig.serializer.GsonConfigSerializer;
 import moriyashiine.bewitchment.api.BewitchmentAPI;
@@ -75,9 +72,31 @@ public class Bewitchment implements ModInitializer {
 	public void onInitialize() {
 		AutoConfig.register(BWConfig.class, GsonConfigSerializer::new);
 		config = AutoConfig.getConfigHolder(BWConfig.class).getConfig();
-		TrinketSlots.addSlot(SlotGroups.CHEST, Slots.NECKLACE, new Identifier("trinkets", "textures/item/empty_trinket_slot_necklace.png"));
-		TrinketSlots.addSlot(SlotGroups.LEGS, Slots.BELT, new Identifier("trinkets", "textures/item/empty_trinket_slot_belt.png"));
-		TrinketSlots.addSlot(SlotGroups.FEET, Slots.AGLET, new Identifier("trinkets", "textures/item/empty_trinket_slot_aglet.png"));
+		BWScaleTypes.init();
+		BWObjects.init();
+		BWBlockEntityTypes.init();
+		BWEntityTypes.init();
+		BWStatusEffects.init();
+		BWEnchantments.init();
+		BWRitualFunctions.init();
+		BWFortunes.init();
+		BWSigils.init();
+		BWTransformations.init();
+		BWContracts.init();
+		BWCurses.init();
+		BWSoundEvents.init();
+		BWParticleTypes.init();
+		BWRecipeTypes.init();
+		BWWorldGenerators.init();
+		BewitchmentAPI.registerAltarMapEntries(BWObjects.STONE_WITCH_ALTAR);
+		BewitchmentAPI.registerAltarMapEntries(BWObjects.MOSSY_COBBLESTONE_WITCH_ALTAR);
+		BewitchmentAPI.registerAltarMapEntries(BWObjects.PRISMARINE_WITCH_ALTAR);
+		BewitchmentAPI.registerAltarMapEntries(BWObjects.NETHER_BRICK_WITCH_ALTAR);
+		BewitchmentAPI.registerAltarMapEntries(BWObjects.BLACKSTONE_WITCH_ALTAR);
+		BewitchmentAPI.registerAltarMapEntries(BWObjects.GOLDEN_WITCH_ALTAR);
+		BewitchmentAPI.registerAltarMapEntries(BWObjects.END_STONE_WITCH_ALTAR);
+		BewitchmentAPI.registerAltarMapEntries(BWObjects.OBSIDIAN_WITCH_ALTAR);
+		BewitchmentAPI.registerAltarMapEntries(BWObjects.PURPUR_WITCH_ALTAR);
 		ServerPlayNetworking.registerGlobalReceiver(CauldronTeleportPacket.ID, CauldronTeleportPacket::handle);
 		ServerPlayNetworking.registerGlobalReceiver(TransformationAbilityPacket.ID, TransformationAbilityPacket::handle);
 		ServerPlayNetworking.registerGlobalReceiver(TogglePressingForwardPacket.ID, TogglePressingForwardPacket::handle);
@@ -104,8 +123,7 @@ public class Bewitchment implements ModInitializer {
 			((CurseAccessor) newPlayer).getCurses().addAll(((CurseAccessor) oldPlayer).getCurses());
 		});
 		ServerEntityCombatEvents.AFTER_KILLED_OTHER_ENTITY.register((world, entity, killedEntity) -> {
-			if (entity instanceof PlayerEntity) {
-				PlayerEntity player = (PlayerEntity) entity;
+			if (entity instanceof PlayerEntity player) {
 				if (killedEntity.getGroup() == EntityGroup.ARTHROPOD && BewitchmentAPI.getFamiliar(player) == BWEntityTypes.TOAD) {
 					player.heal(player.getMaxHealth() * 1 / 4f);
 				}
@@ -217,31 +235,6 @@ public class Bewitchment implements ModInitializer {
 				});
 			}
 		});
-		BWScaleTypes.init();
-		BWObjects.init();
-		BWBlockEntityTypes.init();
-		BWEntityTypes.init();
-		BWStatusEffects.init();
-		BWEnchantments.init();
-		BWRitualFunctions.init();
-		BWFortunes.init();
-		BWSigils.init();
-		BWTransformations.init();
-		BWContracts.init();
-		BWCurses.init();
-		BWSoundEvents.init();
-		BWParticleTypes.init();
-		BWRecipeTypes.init();
-		BWWorldGenerators.init();
-		BewitchmentAPI.registerAltarMapEntries(BWObjects.STONE_WITCH_ALTAR);
-		BewitchmentAPI.registerAltarMapEntries(BWObjects.MOSSY_COBBLESTONE_WITCH_ALTAR);
-		BewitchmentAPI.registerAltarMapEntries(BWObjects.PRISMARINE_WITCH_ALTAR);
-		BewitchmentAPI.registerAltarMapEntries(BWObjects.NETHER_BRICK_WITCH_ALTAR);
-		BewitchmentAPI.registerAltarMapEntries(BWObjects.BLACKSTONE_WITCH_ALTAR);
-		BewitchmentAPI.registerAltarMapEntries(BWObjects.GOLDEN_WITCH_ALTAR);
-		BewitchmentAPI.registerAltarMapEntries(BWObjects.END_STONE_WITCH_ALTAR);
-		BewitchmentAPI.registerAltarMapEntries(BWObjects.OBSIDIAN_WITCH_ALTAR);
-		BewitchmentAPI.registerAltarMapEntries(BWObjects.PURPUR_WITCH_ALTAR);
 		isNourishLoaded = FabricLoader.getInstance().isModLoaded("nourish");
 		isRequiemLoaded = FabricLoader.getInstance().isModLoaded("requiem");
 		if (isRequiemLoaded) {

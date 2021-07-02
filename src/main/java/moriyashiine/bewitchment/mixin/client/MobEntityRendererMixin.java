@@ -5,7 +5,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.Frustum;
-import net.minecraft.client.render.entity.EntityRenderDispatcher;
+import net.minecraft.client.render.entity.EntityRendererFactory;
 import net.minecraft.client.render.entity.LivingEntityRenderer;
 import net.minecraft.client.render.entity.MobEntityRenderer;
 import net.minecraft.client.render.entity.model.EntityModel;
@@ -21,8 +21,8 @@ import java.util.UUID;
 @Environment(EnvType.CLIENT)
 @Mixin(MobEntityRenderer.class)
 public abstract class MobEntityRendererMixin<T extends MobEntity, M extends EntityModel<T>> extends LivingEntityRenderer<T, M> {
-	public MobEntityRendererMixin(EntityRenderDispatcher dispatcher, M model, float shadowRadius) {
-		super(dispatcher, model, shadowRadius);
+	public MobEntityRendererMixin(EntityRendererFactory.Context ctx, M model, float shadowRadius) {
+		super(ctx, model, shadowRadius);
 	}
 	
 	@Inject(method = "shouldRender", at = @At("RETURN"), cancellable = true)

@@ -6,7 +6,8 @@ import net.fabricmc.fabric.api.block.entity.BlockEntityClientSerializable;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityType;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.util.math.BlockPos;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,12 +18,12 @@ public class LockableBlockEntity extends BlockEntity implements BlockEntityClien
 	private UUID owner = null;
 	private boolean modeOnWhitelist = false, locked = false;
 	
-	public LockableBlockEntity(BlockEntityType<?> type) {
-		super(type);
+	public LockableBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
+		super(type, pos, state);
 	}
 	
-	public LockableBlockEntity() {
-		this(BWBlockEntityTypes.LOCKABLE);
+	public LockableBlockEntity(BlockPos pos, BlockState state) {
+		this(BWBlockEntityTypes.LOCKABLE, pos, state);
 	}
 	
 	@Override
@@ -61,24 +62,24 @@ public class LockableBlockEntity extends BlockEntity implements BlockEntityClien
 	}
 	
 	@Override
-	public void fromClientTag(CompoundTag tag) {
-		fromTagLockable(tag);
+	public void fromClientTag(NbtCompound nbt) {
+		fromTagLockable(nbt);
 	}
 	
 	@Override
-	public CompoundTag toClientTag(CompoundTag tag) {
-		toTagLockable(tag);
-		return tag;
+	public NbtCompound toClientTag(NbtCompound nbt) {
+		toNbtLockable(nbt);
+		return nbt;
 	}
 	
 	@Override
-	public void fromTag(BlockState state, CompoundTag tag) {
-		fromClientTag(tag);
-		super.fromTag(state, tag);
+	public void readNbt(NbtCompound nbt) {
+		fromClientTag(nbt);
+		super.readNbt(nbt);
 	}
 	
 	@Override
-	public CompoundTag toTag(CompoundTag tag) {
-		return super.toTag(toClientTag(tag));
+	public NbtCompound writeNbt(NbtCompound nbt) {
+		return super.writeNbt(toClientTag(nbt));
 	}
 }

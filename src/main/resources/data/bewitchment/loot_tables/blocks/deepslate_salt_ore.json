@@ -1,0 +1,59 @@
+{
+  "type": "block",
+  "pools": [
+	{
+	  "rolls": 1,
+	  "entries": [
+		{
+		  "type": "alternatives",
+		  "children": [
+			{
+			  "type": "item",
+			  "conditions": [
+				{
+				  "condition": "match_tool",
+				  "predicate": {
+					"enchantments": [
+					  {
+						"enchantment": "silk_touch",
+						"levels": {
+						  "min": 1
+						}
+					  }
+					]
+				  }
+				}
+			  ],
+			  "name": "bewitchment:salt_ore"
+			},
+			{
+			  "type": "item",
+			  "functions": [
+				{
+				  "function": "set_count",
+				  "count": {
+					"min": 1.0,
+					"max": 2.0,
+					"type": "uniform"
+				  }
+				},
+				{
+				  "function": "apply_bonus",
+				  "enchantment": "fortune",
+				  "formula": "uniform_bonus_count",
+				  "parameters": {
+					"bonusMultiplier": 1
+				  }
+				},
+				{
+				  "function": "explosion_decay"
+				}
+			  ],
+			  "name": "bewitchment:salt"
+			}
+		  ]
+		}
+	  ]
+	}
+  ]
+}

@@ -2,8 +2,8 @@ package moriyashiine.bewitchment.api.interfaces.entity;
 
 import moriyashiine.bewitchment.api.registry.Curse;
 import moriyashiine.bewitchment.common.registry.BWRegistries;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtList;
 
 import java.util.List;
 
@@ -37,13 +37,13 @@ public interface CurseAccessor {
 		}
 	}
 	
-	default ListTag toTagCurse() {
-		ListTag curses = new ListTag();
+	default NbtList toNbtCurse() {
+		NbtList curses = new NbtList();
 		for (Curse.Instance instance : getCurses()) {
-			CompoundTag curseTag = new CompoundTag();
-			curseTag.putString("Curse", BWRegistries.CURSES.getId(instance.curse).toString());
-			curseTag.putInt("Duration", instance.duration);
-			curses.add(curseTag);
+			NbtCompound curseNbt = new NbtCompound();
+			curseNbt.putString("Curse", BWRegistries.CURSES.getId(instance.curse).toString());
+			curseNbt.putInt("Duration", instance.duration);
+			curses.add(curseNbt);
 		}
 		return curses;
 	}

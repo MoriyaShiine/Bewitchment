@@ -13,55 +13,53 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.Inventories;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Hand;
 import net.minecraft.util.ItemScatterer;
-import net.minecraft.util.Tickable;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-public class PoppetShelfBlockEntity extends BlockEntity implements BlockEntityClientSerializable, Tickable, Inventory {
+public class PoppetShelfBlockEntity extends BlockEntity implements BlockEntityClientSerializable, Inventory {
 	public final DefaultedList<ItemStack> inventory = DefaultedList.ofSize(9, ItemStack.EMPTY);
 	
 	public boolean markedForSync = false;
 	
-	public PoppetShelfBlockEntity(BlockEntityType<?> type) {
-		super(type);
+	public PoppetShelfBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
+		super(type, pos, state);
 	}
 	
-	public PoppetShelfBlockEntity() {
-		this(BWBlockEntityTypes.POPPET_SHELF);
+	public PoppetShelfBlockEntity(BlockPos pos, BlockState state) {
+		this(BWBlockEntityTypes.POPPET_SHELF, pos, state);
 	}
 	
-	@Override
-	public void fromClientTag(CompoundTag tag) {
-		Inventories.fromTag(tag, inventory);
-	}
-	
-	@Override
-	public CompoundTag toClientTag(CompoundTag tag) {
-		Inventories.toTag(tag, inventory);
-		return tag;
-	}
-	
-	@Override
-	public void fromTag(BlockState state, CompoundTag tag) {
-		fromClientTag(tag);
-		super.fromTag(state, tag);
-	}
-	
-	@Override
-	public CompoundTag toTag(CompoundTag tag) {
-		return super.toTag(toClientTag(tag));
-	}
-	
-	@Override
-	public void tick() {
-		if (world != null && !world.isClient && markedForSync) {
-			syncPoppetShelf();
+	public static void tick(World world, BlockPos pos, BlockState state, PoppetShelfBlockEntity blockEntity) {
+		if (world != null && !world.isClient && blockEntity.markedForSync) {
+			blockEntity.syncPoppetShelf();
 		}
+	}
+	
+	@Override
+	public void fromClientTag(NbtCompound nbt) {
+		Inventories.readNbt(nbt, inventory);
+	}
+	
+	@Override
+	public NbtCompound toClientTag(NbtCompound nbt) {
+		Inventories.writeNbt(nbt, inventory);
+		return nbt;
+	}
+	
+	@Override
+	public void readNbt(NbtCompound nbt) {
+		fromClientTag(nbt);
+		super.readNbt(nbt);
+	}
+	
+	@Override
+	public NbtCompound writeNbt(NbtCompound nbt) {
+		return super.writeNbt(toClientTag(nbt));
 	}
 	
 	@Override

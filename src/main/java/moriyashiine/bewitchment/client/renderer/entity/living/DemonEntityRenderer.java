@@ -6,7 +6,7 @@ import moriyashiine.bewitchment.common.entity.living.DemonEntity;
 import moriyashiine.bewitchment.common.entity.living.util.BWHostileEntity;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.render.entity.EntityRenderDispatcher;
+import net.minecraft.client.render.entity.EntityRendererFactory;
 import net.minecraft.client.render.entity.MobEntityRenderer;
 import net.minecraft.client.render.entity.feature.HeldItemFeatureRenderer;
 import net.minecraft.util.Identifier;
@@ -15,8 +15,8 @@ import net.minecraft.util.Identifier;
 public class DemonEntityRenderer extends MobEntityRenderer<DemonEntity, DemonEntityModel<DemonEntity>> {
 	private static Identifier[] MALE_TEXTURES, FEMALE_TEXTURES;
 	
-	public DemonEntityRenderer(EntityRenderDispatcher entityRenderDispatcher) {
-		super(entityRenderDispatcher, new DemonEntityModel<>(), 0.5f);
+	public DemonEntityRenderer(EntityRendererFactory.Context context) {
+		super(context, new DemonEntityModel<>(), 0.5f);
 		addFeature(new HeldItemFeatureRenderer<>(this));
 	}
 	
